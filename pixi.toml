@@ -1,0 +1,96 @@
+[workspace]
+name = "synthetic-valley"
+version = "1.0.0"
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
+
+[system-requirements]
+linux = "4.4.0"
+
+[tasks]
+# install environment
+update-dependencies = "pixi update flopy modflow-devtools"
+update-flopy-dfn = { cmd = "python -m flopy.mf6.utils.generate_classes --dfnpath modflow6/doc/mf6io/mf6ivar/dfn" }
+obtain-modflow = { cmd = "get-modflow --repo modflow6-nightly-build :python"}
+get-additional-exes = {cmd = "get-modflow --subset gridgen,triangle :python" }
+install = { depends-on = [
+  "pre-commit-install",
+  "obtain-modflow",
+  "get-additional-exes",
+] }
+
+# format files and clean notebooks
+pre-commit-install = { cmd = "pre-commit install" }
+format = { cmd = "pre-commit run --all-files" }
+
+# run jupyter lab
+jupyter = { cmd = "jupyter lab" }
+
+[dependencies]
+# required
+git = "*"
+jupyterlab = "*"
+matplotlib = ">=1.4.0"
+numpy = ">=1.15.0"
+pip = "*"
+pytest = "*"
+python = "<=3.12"
+pandas = ">=2.0.0"
+scipy = "*"
+
+# notebooks
+ipywidgets = "*"
+xugrid = "*"
+
+# flopy
+contextily = "*" 
+flopy = "*"
+rasterio = "*"
+rasterstats = "*"
+ffmpeg = "*"
+openpyxl = "*"
+xlrd = "*"
+netcdf4 = "*"
+pyshp = "*"
+geopandas = "*"
+xarray = "*"
+rioxarray = "*"
+uxarray = "*"
+pyyaml = "*"
+rtree = "*"
+pyvista = "*"
+vtk = "*"
+imageio = "*"
+pyemu = "*"
+requests = "*"
+statsmodels = "*"
+modflowapi = "*"
+modflow-devtools = "*"
+tomli-w = "*"
+boltons = "*"
+pymetis = "*"
+h5py = ">=3.13.0,<4"
+
+# pre-commit tools
+pre-commit = "*"
+nbstripout = "*"
+ruff = "*"
+jupyterlab_code_formatter = "*"
+pyflwdir = ">=0.5.10,<0.6"
+
+[pypi-dependencies]
+mf6adj = { git = "https://github.com/INTERA-Inc/mf6adj.git", rev = "develop" }
+
+[target.unix.dependencies]
+# build dependencies
+clang = "*"
+gfortran = "*"
+meson = ">=1.3.0"
+ninja = "*"
+pkg-config = "*"
+
+# extended build dependencies
+libnetcdf = "*"
+netcdf-fortran = "*"
+openmpi = "*"
+petsc = "==3.20.5"
