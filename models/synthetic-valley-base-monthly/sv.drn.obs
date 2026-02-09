@@ -1,0 +1,7 @@
+BEGIN options
+END options
+
+BEGIN continuous  FILEOUT  sv.spring.obs.csv
+  SPRING-FLOW  DRN  LEAKE_SPRING
+END continuous  FILEOUT  sv.spring.obs.csv
+

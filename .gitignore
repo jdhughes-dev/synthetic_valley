@@ -205,3 +205,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# mac exclusions
+.DS_Store
+
+# installation exclusions
+modflow6/
+installation/temp/
+
+# modflow exclusions
+*.lst
+*.hds
+*.cbc
+*.grb
+*.csv
+*.bin
+
+# pest exclusions
+
+# exercise exclusions
+.animation/
+.temp/
+synthetic-valley-base/
+synthetic-valley-advanced*/
+synthetic-valley-opt*/
+synthetic-valley-working*/

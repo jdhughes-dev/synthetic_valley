@@ -1,0 +1,14 @@
+BEGIN options
+  BOUNDNAMES
+  OBS6  FILEIN  sv.drn.obs
+END options
+
+BEGIN dimensions
+  MAXBOUND  2
+END dimensions
+
+BEGIN period  1
+  4 23 8 7.50000000E-01 9.32660319E+05 leake_spring
+  5 23 8 7.50000000E-01 9.32660319E+05 leake_spring
+END period  1
+

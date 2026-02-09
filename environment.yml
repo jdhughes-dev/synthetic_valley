@@ -1,0 +1,61 @@
+name: synthetic-valley
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+
+  # primary dependencies
+  - python >=3.10
+  - numpy >=2.0.0
+  - matplotlib >=1.4.0
+  - pandas >=2.0.0
+  - scipy
+  - flopy >= 3.7.0
+
+  # other useful packages
+  - pip
+  - contextily
+  - jupyter
+  - jupytext
+  - jupyterlab
+  - openpyxl
+  - xlrd
+  - netcdf4
+  - pyshp
+  - rasterio
+  - rasterstats
+  - fiona
+  - descartes
+  - pyproj
+  - shapely
+  - geos
+  - geojson
+  - geopandas
+  - xarray
+  - rioxarray
+  - uxarray
+  - pyyaml
+  - rtree
+  - pyvista
+  - vtk
+  - imageio
+  - requests
+  - pytest
+  - statsmodels
+  - modflowapi
+  - pymetis
+  - scikit-learn
+  - pyarrow
+  - git
+  - nbconvert
+  - ffmpeg
+
+  # pre-commit
+  - pre-commit
+  - nbstripout
+  - ruff
+  - jupyterlab_code_formatter
+  - pip:
+       - pypestutils
+       - git+https://github.com/pypest/pyemu.git@develop
+       - git+https://github.com/INTERA-Inc/mf6adj.git@develop
