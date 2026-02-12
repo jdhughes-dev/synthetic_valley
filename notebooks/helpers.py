@@ -57,36 +57,39 @@ def process_csv_files(model_ws="."):
             #    raise Exception("#shitsbusted")
             swgw_dfs.append(swgw_df)
 
-    wel_hist = None
     if bd_df is not None:
         if "datetime" in bd_df.columns:
             bd_df.index = pd.to_datetime(bd_df.pop("datetime"))
-        bd_df = bd_df.loc[:, bd_df.columns.str.contains("wel")]
+        wbd_df = bd_df.loc[:, bd_df.columns.str.contains("wel")]
         # print(bd_df)
-        wel_hist = bd_df.loc[bd_df.index.year < 2015, :].values.sum()
-        wel_pred = bd_df.loc[bd_df.index.year >= 2015, :].values.sum()
-        wel_diff = wel_hist - wel_pred
-        print(wel_hist, wel_pred, wel_diff)
+        wel_tot = wbd_df.values.sum()
 
-    if swgw_dfs is not None:
-        df = pd.concat(swgw_dfs, axis=1)
-        hist_mean = df.loc[(df.index.year < 2015) & (df.index.year >= 2010), :].mean()
-        pred_mean = df.loc[df.index.year > 2019, :].mean()
-        diff_mean = hist_mean - pred_mean
-        df = pd.DataFrame(
-            data={
-                "hist-mean": hist_mean,
-                "pred-mean": pred_mean,
-                "diff-mean": diff_mean,
-            }
-        )
-        df.index.name = "quantity"
-        if wel_hist is not None:
-            df.loc["wel-sum", "hist-mean"] = wel_hist
-            df.loc["wel-sum", "pred-mean"] = wel_pred
-            df.loc["wel-sum", "diff-mean"] = wel_diff
-            print(wel_hist, wel_pred, wel_diff)
-        df.to_csv(os.path.join(model_ws, "swgw-longterm-means.csv"))
+        sbd_df = bd_df.loc[:, bd_df.columns.str.contains("spring")]
+        # print(bd_df)
+        spr_tot = sbd_df.values.sum()
+        with open(os.path.join(model_ws, "budget-totals.csv"), "w") as f:
+            f.write("quantity,value\n")
+            f.write("wel-total,{0}\n".format(wel_tot))
+            f.write("spring-total,{0}\n".format(spr_tot))
+
+    # if swgw_dfs is not None:
+    #     df = pd.concat(swgw_dfs, axis=1)
+    #     hist_mean = df.loc[(df.index.year < 2015) & (df.index.year >= 2010), :].mean()
+    #     pred_mean = df.loc[df.index.year > 2019, :].mean()
+    #     diff_mean = hist_mean - pred_mean
+    #     df = pd.DataFrame(
+    #         data={
+    #             "hist-mean": hist_mean,
+    #             "pred-mean": pred_mean,
+    #             "diff-mean": diff_mean,
+    #         }
+    #     )
+    #     df.index.name = "quantity"
+    #     if wel_tot is not None:
+    #         df.loc["wel-mean", "tot-sum"] = wel_tot
+    #         df.loc["spr-mean", "tot-sum"] = spr_tot
+
+    #     df.to_csv(os.path.join(model_ws, "swgw-longterm-means.csv"))
 
     if aq_df is not None and wt_df is not None:
         # print(wt_df)
@@ -562,18 +565,17 @@ def get_domain_map():
         verbosity_level=0,
     )
     gwf = sim.get_model()
+
+    riv = gwf.riv.stress_period_data.array[0]
+    springi = min([ci[1] for ci in riv["cellid"]])
+    springj = max([ci[2] for ci in riv["cellid"]])
+    springi, springj
+    X = gwf.modelgrid.xcellcenters
+    Y = gwf.modelgrid.ycellcenters
+
     obs_path = os.path.join("..", "synthetic-valley", "data")
     with open(os.path.join(obs_path, "obs_data.pkl"), "rb") as f:
         obs_rc_locs, well_depth, aq_layer = pickle.load(f)
-
-    xy = [
-        (
-            float(gwf.modelgrid.xcellcenters[i, j]),
-            float(gwf.modelgrid.ycellcenters[i, j]),
-        )
-        for i, j in obs_rc_locs
-    ]
-    x, y = np.array(xy)[:, 0], np.array(xy)[:, 1]
 
     with flopy.plot.styles.USGSMap():
         fig, axs = plt.subplots(1, 2, figsize=(8, 5), sharey=True)
@@ -586,10 +588,10 @@ def get_domain_map():
         mm.plot_grid(lw=0.5, color="0.5")
         mm.plot_bc("riv", label="river")
         mm.plot_bc("wel_0", kper=1, plotAll=True, label="well")
-        ax.scatter(x, y, s=3, c="black")
-        for i in range(len(xy)):
-            ax.annotate(f"wt{i + 1}", (x[i], y[i]))
-
+        # ax.scatter(x, y, s=3, c="black")
+        # for i in range(len(xy)):
+        #     ax.annotate(f"wt{i + 1}", (x[i], y[i]))
+        ax.scatter(X[springi, springj], Y[springi, springj], marker="^", s=80, c="m")
         ax.set_title("Water Table")
 
         ax = axs[1]
@@ -598,25 +600,26 @@ def get_domain_map():
         mm = flopy.plot.PlotMapView(model=gwf, ax=ax, extent=gwf.modelgrid.extent)
         mm.plot_grid(lw=0.5, color="0.5")
         mm.plot_bc("wel_0", kper=1, plotAll=True, label="well")
-        ax.scatter(x, y, s=3, c="black")
-        for i in range(len(xy)):
-            ax.annotate(f"aq{i + 1}", (x[i], y[i]))
+        # ax.scatter(x, y, s=3, c="black")
+        # for i in range(len(xy)):
+        #     ax.annotate(f"aq{i + 1}", (x[i], y[i]))
+        ax.scatter(X[springi, springj], Y[springi, springj], marker="^", s=80, c="m")
 
         ax.set_title("Lower Aquifer")
     return fig, axs
 
 
 if __name__ == "__main__":
-    get_domain_map()
-    exit()
+    # get_domain_map()
+    # exit()
     # process_csv_files(os.path.join("..","models","synthetic-valley-truth-advanced-monthly"))
-    # process_csv_files(os.path.join("model_and_pest_files_opt"))
+    process_csv_files(os.path.join("model_and_pest_files"))
     # extract_true_obs(
     #     os.path.join("..", "models", "synthetic-valley-truth-advanced-monthly")
     # )
-    fig, axes = plot_ies_properties(
-        "master_dsi", "sto-ss-layer1", pst_name="dsi.pst", noptmax=None
-    )
+    # fig, axes = plot_ies_properties(
+    #     "master_dsi", "sto-ss-layer1", pst_name="dsi.pst", noptmax=None
+    # )
     # plt.savefig("test.pdf")
     # plt.close(fig)
     # $plot_ies_timeseries("master_ies", noptmax=None)
